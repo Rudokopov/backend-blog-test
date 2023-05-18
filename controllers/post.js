@@ -53,13 +53,13 @@ const updatePost = async (req, res, next) => {
     if (post.author.id !== userId) {
       throw new AccessError("У вас нет на это прав");
     }
-    await Post.updateOne(
+    const result = await Post.updateOne(
       { _id: id },
       { title, description },
       { new: true, runValidators: true }
     );
 
-    res.send(post);
+    res.send(result);
   } catch (err) {
     next(err);
   }
