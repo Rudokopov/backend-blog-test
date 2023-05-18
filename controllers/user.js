@@ -83,7 +83,7 @@ const login = async (req, res, next) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email }).select("+passwordHash");
     if (!user) {
-      throw new ReferenceError("Пользователь не найден");
+      throw new NotFound("Пользователь не найден");
     }
     const isValid = await bcrypt.compare(password, user._doc.passwordHash);
     if (!isValid) {

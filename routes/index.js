@@ -21,7 +21,7 @@ import {
 } from "../controllers/user.js";
 
 // Роуты для постов
-router.get("/posts", checkAuth, getPosts);
+router.get("/posts", getPosts);
 router.post("/posts", checkAuth, createPost);
 router.patch("/posts/:id", checkAuth, updatePost);
 router.delete("/posts/:id", checkAuth, deletePost);
