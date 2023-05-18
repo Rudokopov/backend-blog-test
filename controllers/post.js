@@ -46,20 +46,22 @@ const updatePost = async (req, res, next) => {
     const userId = req.userId;
     const { id } = req.params;
     const { title, description } = req.body;
-    const post = await Post.findById(id).populate(["author"]);
+
+    const post = await Post.findByIdAndUpdate(
+      id,
+      { title, description },
+      { new: true, runValidators: true }
+    ).populate(["author"]);
+
     if (!post) {
       throw new NotFound("Пост с таким ID не найден");
     }
+
     if (post.author.id !== userId) {
       throw new AccessError("У вас нет на это прав");
     }
-    const result = await Post.updateOne(
-      { _id: id },
-      { title, description },
-      { new: true, runValidators: true }
-    );
 
-    res.send(result);
+    res.send(post);
   } catch (err) {
     next(err);
   }
