@@ -1,12 +1,17 @@
 import express from "express";
 import dotenv from "dotenv";
-import { PORT } from "./config.js";
+import { PORT, DATA_BASE } from "./config.js";
+import mongoose from "mongoose";
+import { router } from "./routes/index.js";
 dotenv.config();
 
 const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-const hostname = "localhost";
+mongoose.connect(DATA_BASE);
+app.use(router);
 
-app.listen(PORT, hostname, () => {
-  console.log(`Server running at http://${hostname}:${PORT}/`);
+app.listen(PORT, () => {
+  console.log("Сервер запущен");
 });

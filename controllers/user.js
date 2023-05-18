@@ -9,7 +9,9 @@ import {
   ReferenceError,
 } from "../customErrors/customErrors.js";
 
-const getUser = async (req, res, next) => {
+const { NODE_ENV, JWT_SECRET } = process.env;
+
+const getUsers = async (req, res, next) => {
   try {
     const response = await User.find({});
     res.send(response);
@@ -39,7 +41,7 @@ const getUserById = async (req, res, next) => {
 
 const getUserMe = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const id = req.userId;
     const response = await User.findById(id);
     if (!response) {
       throw new NotFound("Пользователь с похожим ID не найден");
@@ -79,7 +81,7 @@ const createNewUser = async (req, res, next) => {
 const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    const user = User.findOne({ email }).select("+passwordHash");
+    const user = await User.findOne({ email }).select("+passwordHash");
     if (!user) {
       throw new ReferenceError("Пользователь не найден");
     }
@@ -87,7 +89,6 @@ const login = async (req, res, next) => {
     if (!isValid) {
       throw new ValidationError("Неправильные почта или пароль");
     }
-
     const token = jwt.sign(
       {
         _id: user._id,
@@ -111,4 +112,4 @@ const login = async (req, res, next) => {
   }
 };
 
-export { getUser, getUserById, getUserMe, createNewUser, login };
+export { getUsers, getUserById, getUserMe, createNewUser, login };

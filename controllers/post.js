@@ -4,8 +4,22 @@ import { NotFound, BadRequestError } from "../customErrors/customErrors.js";
 
 const getPosts = async (req, res, next) => {
   try {
-    const response = await Post.find({});
-    res.send(response);
+    const page = parseInt(req.query.page) || 1; // Текущая страница (по умолчанию 1)
+    const perPage = 20; // Количество статей на странице
+
+    const totalPosts = await Post.countDocuments(); // Общее количество статей в базе данных
+    const totalPages = Math.ceil(totalPosts / perPage); // Общее количество страниц
+
+    const posts = await Post.find({})
+      .skip((page - 1) * perPage) // Пропустить статьи на предыдущих страницах
+      .limit(perPage); // Ограничить количество возвращаемых статей
+
+    res.send({
+      totalPosts,
+      totalPages,
+      currentPage: page,
+      posts,
+    });
   } catch (err) {
     res.send(`Ошибка произошла при получении карточек ${err.name}`);
     next(err);
@@ -16,7 +30,7 @@ const createPost = async (req, res, next) => {
   try {
     const id = req.userId;
     const { title, description } = req.body;
-    const post = Post.create({ title, description, author: id });
+    const post = await Post.create({ title, description, author: id });
     res.send(post);
   } catch (err) {
     if (err instanceof mongoose.Error.ValidationError) {
@@ -32,7 +46,7 @@ const updatePost = async (req, res, next) => {
     const userId = req.userId;
     const { id } = req.params;
     const { title, description } = req.body;
-    const post = Post.findById(id).populate(["author"]);
+    const post = await Post.findById(id).populate(["author"]);
     if (!post) {
       throw new NotFound("Пост с таким ID не найден");
     }
@@ -44,6 +58,7 @@ const updatePost = async (req, res, next) => {
       { title, description },
       { new: true, runValidators: true }
     );
+
     res.send(post);
   } catch (err) {
     next(err);
@@ -54,7 +69,7 @@ const deletePost = async (req, res, next) => {
   try {
     const userId = req.userId;
     const { id } = req.params;
-    const post = Post.findById(id).populate(["author"]);
+    const post = await Post.findById(id).populate(["author"]);
     if (!post) {
       throw new NotFound("Пост с таким ID не найден");
     }
