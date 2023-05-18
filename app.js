@@ -1,9 +1,11 @@
 import express from "express";
 import dotenv from "dotenv";
-import { PORT, DATA_BASE } from "./config.js";
+import { PORT } from "./config.js";
 import mongoose from "mongoose";
 import { router } from "./routes/index.js";
 dotenv.config();
+
+const { DATA_BASE } = process.env;
 
 const app = express();
 app.use(express.json());
